@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { locationService } from '../services/locationService';
+import { useToast } from '../store/ToastContext';
 import { calculateDistanceMeters } from '../utils/geo';
 import { useTrackingStore } from '../store/TrackingContext';
 
@@ -8,6 +9,7 @@ export function useGeolocationTracking(locations = []) {
   const triggeredRef = useRef(new Set());
   const [error, setError] = useState('');
   const { isTracking, setIsTracking, setCurrentPosition, setLastEvent } = useTrackingStore();
+  const { showToast } = useToast();
 
   const stop = () => {
     if (watcherRef.current != null) {
@@ -53,7 +55,43 @@ export function useGeolocationTracking(locations = []) {
         try {
           const response = await locationService.checkArrival(point);
           if (response.log) {
-            setLastEvent(response.log);
+            const nextEvent = {
+              ...response.log,
+              location: response.location || response.log.location,
+              skipped: response.skipped,
+            };
+
+            setLastEvent(nextEvent);
+
+            if (response.skipped) {
+              showToast({
+                title: `Arrival already recorded for ${response.location?.name || 'this location'}`,
+                description: 'Cooldown is still active, so no new message was sent.',
+                tone: 'warning',
+              });
+            } else if (nextEvent.deliveryStatus === 'simulated') {
+              showToast({
+                title: `Simulated message completed for ${response.location?.name || 'your safe zone'}`,
+                description: 'SafePing logged a mock delivery and did not contact anyone.',
+              });
+            } else if (nextEvent.deliveryStatus === 'sent') {
+              showToast({
+                title: `Message sent for ${response.location?.name || 'your safe zone'}`,
+                description: 'Your trusted contact notifications were delivered successfully.',
+              });
+            } else if (nextEvent.deliveryStatus === 'partial') {
+              showToast({
+                title: `Partial delivery for ${response.location?.name || 'your safe zone'}`,
+                description: 'At least one contact received the message, but others may have failed.',
+                tone: 'warning',
+              });
+            } else {
+              showToast({
+                title: `Message failed for ${response.location?.name || 'your safe zone'}`,
+                description: 'SafePing recorded the arrival, but the notification could not be delivered.',
+                tone: 'error',
+              });
+            }
           }
         } catch (requestError) {
           triggeredRef.current.delete(nearbyLocation._id);

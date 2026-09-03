@@ -10,6 +10,7 @@ import { locationService } from '../services/locationService';
 import { historyService } from '../services/historyService';
 import { contactService } from '../services/contactService';
 import { useGeolocationTracking } from '../hooks/useGeolocationTracking';
+import { useTrackingStore } from '../store/TrackingContext';
 import { cn } from '../utils/cn';
 
 function DashboardPage() {
@@ -18,6 +19,7 @@ function DashboardPage() {
   const [contacts, setContacts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const { lastEvent } = useTrackingStore();
   const { isTracking, start, stop, error: trackingError } = useGeolocationTracking(locations);
 
   const loadData = async () => {
@@ -41,6 +43,14 @@ function DashboardPage() {
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    if (!lastEvent) {
+      return;
+    }
+
+    loadData();
+  }, [lastEvent]);
 
   const handleDeleteLocation = async (locationId) => {
     try {

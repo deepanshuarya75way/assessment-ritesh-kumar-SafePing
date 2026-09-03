@@ -56,9 +56,9 @@ export function MobileMenu({ onLogout }) {
       </Button>
 
       {isOpen ? (
-        <div className="fixed inset-0 z-[1000] bg-black/50 backdrop-blur-sm" onClick={() => setIsOpen(false)}>
+        <div className="fixed inset-0 z-[1000] bg-black/60 backdrop-blur-sm" onClick={() => setIsOpen(false)}>
           <aside
-            className="glass-panel absolute right-3 top-3 w-[min(18rem,calc(100vw-1.5rem))] rounded-[1.8rem] p-4 shadow-2xl"
+            className="absolute right-3 top-3 w-[min(18rem,calc(100vw-1.5rem))] rounded-[1.8rem] border border-white/10 bg-[hsl(var(--card))] p-4 shadow-2xl shadow-black/40"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="mb-5 flex items-center justify-between gap-3">

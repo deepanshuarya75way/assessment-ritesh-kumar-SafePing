@@ -2,6 +2,7 @@ const twilio = require('twilio');
 const env = require('../config/env');
 
 let client = null;
+const isSimulatedMode = env.smsMode === 'simulated';
 
 const hasValidTwilioConfig =
   typeof env.twilioSid === 'string' &&
@@ -9,7 +10,7 @@ const hasValidTwilioConfig =
   Boolean(env.twilioAuthToken) &&
   Boolean(env.twilioPhone);
 
-if (hasValidTwilioConfig) {
+if (!isSimulatedMode && hasValidTwilioConfig) {
   client = twilio(env.twilioSid, env.twilioAuthToken);
 }
 
@@ -19,7 +20,7 @@ async function sendSms({ to, body }) {
       deliveryStatus: 'simulated',
       providerResponse: {
         sid: 'simulated-message',
-        error: 'Twilio credentials are missing or invalid.',
+        error: isSimulatedMode ? 'SMS simulation mode is enabled.' : 'Twilio credentials are missing or invalid.',
       },
     };
   }

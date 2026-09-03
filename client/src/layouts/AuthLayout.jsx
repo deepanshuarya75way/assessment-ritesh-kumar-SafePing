@@ -11,10 +11,10 @@ function AuthLayout({ title, subtitle, children }) {
           <div className="text-sm uppercase tracking-[0.3em] text-cyan-200">SafePing</div>
           <div>
             <h1 className="max-w-lg text-5xl font-semibold leading-tight">
-              Quietly handle the "I reached safely" text for every arrival.
+              Automatic safe-arrival alerts for the people who matter.
             </h1>
             <p className="mt-6 max-w-md text-lg text-slate-300">
-              Build trusted geofences, track in real time, and let SafePing send the message when you make it home.
+              Create trusted places, track your trip, and notify contacts as soon as you reach home.
             </p>
           </div>
         </div>

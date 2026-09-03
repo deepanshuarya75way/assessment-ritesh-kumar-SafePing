@@ -11,6 +11,7 @@ module.exports = {
   mongoUri: readEnv('MONGO_URI', 'mongodb://127.0.0.1:27017/safeping'),
   jwtSecret: readEnv('JWT_SECRET', 'change-me'),
   jwtExpiresIn: readEnv('JWT_EXPIRES_IN', '7d'),
+  smsMode: readEnv('SMS_MODE', 'live').toLowerCase(),
   twilioSid: readEnv('TWILIO_SID'),
   twilioAuthToken: readEnv('TWILIO_AUTH_TOKEN'),
   twilioPhone: readEnv('TWILIO_PHONE'),
