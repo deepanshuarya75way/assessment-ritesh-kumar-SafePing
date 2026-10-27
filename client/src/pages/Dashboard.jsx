@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate,useLocation } from 'react-router-dom';
 import { MapPin, Plus, Trash2, Users } from 'lucide-react';
 import StatCard from '../components/StatCard';
 import TrackingControl from '../components/TrackingControl';
@@ -21,6 +21,9 @@ function DashboardPage() {
   const [error, setError] = useState('');
   const { lastEvent } = useTrackingStore();
   const { isTracking, start, stop, error: trackingError } = useGeolocationTracking(locations);
+  const navigate = useNavigate();
+  const routerLocation = useLocation();
+  const selectedLocation = routerLocation.state?.location;
 
   const loadData = async () => {
     try {
@@ -136,6 +139,13 @@ function DashboardPage() {
                       {location.message}
                     </p>
                   </div>
+                  <Button type="button" size="sm" onClick = {()=>{
+                    NavigateEvent('/add-location', {state:{location}});
+
+                  }}
+                  >
+                    Edit
+                  </Button>
                   <Button type="button" variant="ghost" size="sm" onClick={() => handleDeleteLocation(location._id)}>
                     <Trash2 className="h-4 w-4" />
                   </Button>

@@ -24,6 +24,35 @@ const createContact = asyncHandler(async (req, res) => {
   res.status(201).json({ contact });
 });
 
+const updateContact = async(req, res) => {
+  try{
+    const {name,phone} = req.body;
+    if(!name || ! phone){
+      return res.status(400).json({
+        message:"Name and phone are required"
+      });
+    }
+    const contact = await Contact.findOne({
+     _id: req.params.contactId,
+     user: req.user._id 
+    });
+    if(!contact){
+      return res.json({
+        message:"contact not found"
+      });
+    }
+    contact.name = name;
+    contact.phone = phone;
+    await contact.save();
+    res.status(200).json({contact});
+  }catch(err){
+    res.status(500).json({
+      message:"Failed to update contact"
+    });
+  }
+}
+
+
 const deleteContact = asyncHandler(async (req, res) => {
   const contact = await Contact.findOne({
     _id: req.params.contactId,
@@ -48,4 +77,4 @@ const deleteContact = asyncHandler(async (req, res) => {
   res.json({ message: 'Contact deleted.' });
 });
 
-module.exports = { listContacts, createContact, deleteContact };
+module.exports = { listContacts, createContact,updateContact, deleteContact };

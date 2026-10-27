@@ -13,6 +13,10 @@ function AddLocationPage() {
   const [contacts, setContacts] = useState([]);
   const [contactForm, setContactForm] = useState({ name: '', phone: '' });
   const [error, setError] = useState('');
+  const [editingContactId, setEditingContactId] = useState(null);
+  const [editingLocationId, setEditingLocationId] = useState(null);
+  const [editingLocation, setEditingLocation] = useState(null);
+
   const [isSubmittingLocation, setIsSubmittingLocation] = useState(false);
 
   const loadContacts = async () => {
@@ -27,8 +31,17 @@ function AddLocationPage() {
   const createContact = async (event) => {
     event.preventDefault();
     try {
-      setError('');
+      
+      if(editingContactId){
+        await contactService.update(
+          editingContactId,
+          contactForm
+        );
+      }else{
+
+      
       await contactService.create(contactForm);
+      }
       setContactForm({ name: '', phone: '' });
       loadContacts();
     } catch (requestError) {
@@ -40,7 +53,15 @@ function AddLocationPage() {
     try {
       setIsSubmittingLocation(true);
       setError('');
-      await locationService.create(payload);
+      setIsSubmittingLocation(true);
+      setError('');
+      if(editingLocationId){
+        await locationService.update(editingLocationId,payload);
+        
+      }else{
+        await locationService.create(payload);
+      }
+      ;
       navigate('/dashboard');
     } catch (requestError) {
       setError(requestError.response?.data?.message || 'Unable to save location.');
@@ -114,6 +135,17 @@ function AddLocationPage() {
                 <p className="truncate text-sm text-[hsl(var(--muted-foreground))]">{contact.phone}</p>
               </div>
               <CheckCircle className="h-5 w-5 text-cyan-300" />
+              
+
+              <button type="button"
+              onClick = {()=>{
+                setContactForm({
+                  name:contact.name,
+                  phone:contact.phone,
+                });
+                className="text-sm text-blue-400"
+              }}
+              >Edit</button>
             </div>
           ))}
         </div>
