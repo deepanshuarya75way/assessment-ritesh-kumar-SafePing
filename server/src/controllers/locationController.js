@@ -42,6 +42,10 @@ const createLocation = asyncHandler(async (req, res) => {
   res.status(201).json({ location });
 });
 
+
+
+
+
 const deleteLocation = asyncHandler(async (req, res) => {
   const location = await Location.findOne({
     _id: req.params.locationId,

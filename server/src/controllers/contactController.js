@@ -48,4 +48,16 @@ const deleteContact = asyncHandler(async (req, res) => {
   res.json({ message: 'Contact deleted.' });
 });
 
-module.exports = { listContacts, createContact, deleteContact };
+const updateContact = asyncHandler(async (req,res) => {
+  const contact = await Contact.findOne({_id:req.params.contactId, user:req.user._id});
+  if(!contact) throw new ApiError(404,'contact not found');
+  const name = String(req.body.name || '').trim();
+  const phone = String(req.body.phone || '').trim();
+  if(!name || !phone) throw new ApiError(400,'Contact name and phone are required');
+  contact.name = name;
+  contact.phone = phone;
+  await contact.save();
+  res.json({contact});
+})
+
+module.exports = { listContacts, createContact, deleteContact, updateContact };

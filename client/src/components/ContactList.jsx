@@ -1,8 +1,12 @@
 import { Trash2, User } from 'lucide-react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
+import {useState} from 'react';
+import { Input } from './ui/input';
+import { useNavigate } from 'react-router-dom';
 
 function ContactList({ contacts, onDelete }) {
+  const navigate = useNavigate();
   return (
     <Card>
       <div className="flex items-start justify-between gap-4">
@@ -32,10 +36,15 @@ function ContactList({ contacts, onDelete }) {
                 <p className="truncate text-sm text-[hsl(var(--muted-foreground))]">{contact.phone}</p>
               </div>
             </div>
-
+            <div>
+            <Button type="button" size="sm"
+              onClick={()=>navigate('/locations/new', {state:{editContact : contact}})} >
+                Edit
+              </Button>
             <Button type="button" size="sm" variant="ghost" onClick={() => onDelete(contact._id)}>
               <Trash2 className="h-4 w-4" />
             </Button>
+            </div>
           </div>
         ))}
       </div>

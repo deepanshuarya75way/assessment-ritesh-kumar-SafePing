@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import LocationForm from '../components/LocationForm';
 import { CheckCircle, Shield } from 'lucide-react';
 import { Card } from '../components/ui/card';
@@ -14,6 +14,15 @@ function AddLocationPage() {
   const [contactForm, setContactForm] = useState({ name: '', phone: '' });
   const [error, setError] = useState('');
   const [isSubmittingLocation, setIsSubmittingLocation] = useState(false);
+  const [editingContactId, setEditingContactId] = useState(null);
+  const routeLocation = useLocation();
+  useEffect(()=>{
+    const contact = routeLocation.state?.editContact;
+    if(contact){
+      setEditingContactId(contact._id);
+      setContactForm({name:contact.name, phone:contact.phone});
+    }
+  },[routeLocation.state])
 
   const loadContacts = async () => {
     const response = await contactService.list();
@@ -28,7 +37,9 @@ function AddLocationPage() {
     event.preventDefault();
     try {
       setError('');
-      await contactService.create(contactForm);
+      if(editingContactId) await contactService.update(editingContactId, contactForm);
+      else await contactService.create(contactForm);
+      setEditingContactId(null);
       setContactForm({ name: '', phone: '' });
       loadContacts();
     } catch (requestError) {
@@ -91,7 +102,7 @@ function AddLocationPage() {
               required
             />
           </label>
-          <Button type="submit" className="w-full sm:w-auto">Save contact</Button>
+          <Button type="submit" className="w-full sm:w-auto">{editingContactId ? 'Save changes' : 'Save contact'}</Button>
         </form>
 
         {error ? <p className="mt-4 text-sm text-rose-300">{error}</p> : null}
@@ -113,7 +124,13 @@ function AddLocationPage() {
                 <p className="truncate font-medium">{contact.name}</p>
                 <p className="truncate text-sm text-[hsl(var(--muted-foreground))]">{contact.phone}</p>
               </div>
+              <div className='flex justify-center align-center gap-3'>
+              <Button type="button" size="sm"
+              onClick={()=>{setEditingContactId(contact._id); setContactForm({name:contact.name, phone:contact.phone});}} >
+                Edit
+              </Button>
               <CheckCircle className="h-5 w-5 text-cyan-300" />
+              </div>
             </div>
           ))}
         </div>
