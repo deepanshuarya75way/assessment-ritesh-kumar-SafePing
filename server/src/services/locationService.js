@@ -5,11 +5,16 @@ const { sendSms } = require('./smsService');
 
 async function detectArrival({ userId, point }) {
   const locations = await Location.find({ user: userId }).populate('contacts');
+  let blocked = null;
 
   for (const location of locations) {
     const distanceMeters = calculateDistanceMeters(point, location.coordinates);
 
     if (distanceMeters > location.radius) {
+      continue;
+    }
+    if(location.paused){
+      blocked = blocked || {location, log:null, skipped:true, skippedReason:'paused'};
       continue;
     }
 
@@ -74,7 +79,7 @@ async function detectArrival({ userId, point }) {
     return { location, log, skipped: false };
   }
 
-  return null;
+  return blocked;
 }
 
 module.exports = { detectArrival };

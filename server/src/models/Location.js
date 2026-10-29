@@ -44,6 +44,10 @@ const locationSchema = new mongoose.Schema(
       type: Number,
       default: 60,
     },
+    paused:{
+      type:Boolean,
+      default:false,
+    }
   },
   { timestamps: true },
 );

@@ -61,6 +61,15 @@ function DashboardPage() {
       setError(requestError.response?.data?.message || 'Unable to delete location.');
     }
   };
+  
+  const handleTogglePause = async (location) => {
+    try{
+      await locationService.update(location._id, {paused:!location.paused});
+      loadData();
+    } catch (requestError) {
+      setError(requestError.response?.data?.message || 'Unable to pause location.');
+    }
+  }
 
   const handleDeleteContact = async (contactId) => {
     try {
@@ -118,6 +127,11 @@ function DashboardPage() {
                       <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2.5 py-1 text-xs font-medium text-cyan-200">
                         {location.radius}m radius
                       </span>
+                      {location.paused ? (
+                        <span className='rounded-full border border-amber-400/40 bg-amber-400/10 px-2.5 py-1 text-xs font-medium text-amber-200'>
+                          Paused
+                        </span>
+                      ):null}
                     </div>
                     <p className="mt-2 break-words text-sm text-[hsl(var(--muted-foreground))]">
                       {location.coordinates.latitude}, {location.coordinates.longitude}
@@ -139,6 +153,13 @@ function DashboardPage() {
                   </div>
                   <Button type="button" size="sm" onClick={()=>navigate('/locations/new',{state:{editLocation:location}})}>
                     Edit
+                  </Button>
+                  <Button
+                  type="button"
+                  size='sm'
+                  onClick={()=>handleTogglePause(location)}
+                  >
+                    {location.paused ? 'Resume' : 'Pause'}
                   </Button>
                   <Button type="button" variant="ghost" size="sm" onClick={() => handleDeleteLocation(location._id)}>
                     <Trash2 className="h-4 w-4" />

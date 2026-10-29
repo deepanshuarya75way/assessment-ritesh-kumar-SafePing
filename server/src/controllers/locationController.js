@@ -46,6 +46,12 @@ const createLocation = asyncHandler(async (req, res) => {
 const updateLocation = asyncHandler(async (req,res) => {
   const location = await Location.findOne({_id:req.params.locationId, user:req.user._id});
   if(!location) throw new ApiError(404,'Location not found');
+  if(Object.keys(req.body).length === 1 && req.body.paused !== undefined){
+    location.paused = Boolean(req.body.paused);
+    await location.save();
+    await location.populate('contacts');
+    return res.json({location});
+  }
   const {name, latitude, longitude, radius, contactIds, message} = req.body;
   if(name !== undefined){
     if(!String(name).trim()) throw new ApiError(400, 'Location name is Required');
@@ -101,6 +107,15 @@ const checkArrival = asyncHandler(async (req, res) => {
 
   if (!result) {
     return res.json({ message: 'No geofence matched.', log: null });
+  }
+  if(result.skippedReason === 'paused'){
+    return res.json({
+      messagae:`No message sent : "${result.location.name}" is paused`,
+      location:result.location,
+      log:null,
+      skipped:true,
+      skippedReason:'paused',
+    })
   }
 
   res.json({
