@@ -47,6 +47,12 @@ const locationSchema = new mongoose.Schema(
     paused:{
       type:Boolean,
       default:false,
+    },
+    activeHours:{
+      days:{type:[Number], default:undefined},
+      startTime:String,
+      endTime:String,
+      timeZone:String,
     }
   },
   { timestamps: true },

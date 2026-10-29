@@ -3,6 +3,17 @@ const Location = require('../models/Location');
 const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
 const { detectArrival } = require('../services/locationService');
+const TIME_RE = /^([01]\d|2[0-3]) : [0-5]\d$/;
+function parseActiveHours(input){
+  if(!input) return {days:[]};
+  const {days, startTime, endTime, timezone} = input;
+  if(!Array.isArray(days) || days.length === 0) throw new ApiError(400, 'choose at leastone actcive day');
+  const cleanDays = [...new Set(days.map(Number))];
+  if(cleanDays.some((d) => !Number.isInteger(d) || d < 0 || d > 6)) throw new ApiError(400, 'active days must be between sunday and saturday');
+  if(!TIME_RE.test(startTime || '') || !TIME_RE.test(endTime || '')) throw new ApiError(400, 'time format is not valid');
+  if(startTime === endTime) throw new ApiError(400, 'start and end time cannot be the same ');
+  return {days: cleanDays, startTime, endTime, timezone: timezone || 'UTC'};
+}
 
 const listLocations = asyncHandler(async (req, res) => {
   const locations = await Location.find({ user: req.user._id })
