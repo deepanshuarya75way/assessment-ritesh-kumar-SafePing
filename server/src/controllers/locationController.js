@@ -18,6 +18,7 @@ const createLocation = asyncHandler(async (req, res) => {
   if (!name || latitude == null || longitude == null || !radius || !Array.isArray(contactIds) || !contactIds.length || !message) {
     throw new ApiError(400, 'All location fields are required.');
   }
+  if(!(Number(radius) >= 50)) throw new ApiError(400,'Radius must be at least 50 meters');
 
   const contacts = await Contact.find({
     _id: { $in: contactIds },
@@ -42,7 +43,33 @@ const createLocation = asyncHandler(async (req, res) => {
   res.status(201).json({ location });
 });
 
-
+const updateLocation = asyncHandler(async (req,res) => {
+  const location = await Location.findOne({_id:req.params.locationId, user:req.user._id});
+  if(!location) throw new ApiError(404,'Location not found');
+  const {name, latitude, longitude, radius, contactIds, message} = req.body;
+  if(name !== undefined){
+    if(!String(name).trim()) throw new ApiError(400, 'Location name is Required');
+  }
+  if(message !== undefined){
+    if(!String(message).trim()) throw new ApiError(400, 'message is Required');
+  }
+  if(latitude != null && longitude != null){
+    location.coordinates = {latitude:Number(latitude), longitude:Number(longitude)};
+  }
+  if(radius !== undefined){
+    if(!(Number(radius) >= 50)) throw new ApiError(400,'Radius must be at least 50 meters');
+    location.radius = Number(radius);
+  }
+  if(contactIds !== undefined){
+    if(!Array.isArray(contactIds) || !contactIds.length) throw new ApiError(400,'Select atleast one contactc');
+    const contacts = await Contact.find({_id:{$in:contactIds}, user:req.user._id});
+    if(contacts.length !== contactIds.length) throw new ApiError(404,'One or more selected contacts were not found');
+    location.contacts = contacts.map((c) => c._id);
+  }
+  await location.save();
+  await location.populate('contacts');
+  res.json({location});
+});
 
 
 
@@ -84,4 +111,4 @@ const checkArrival = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { listLocations, createLocation, deleteLocation, checkArrival };
+module.exports = { listLocations, createLocation, deleteLocation, checkArrival, updateLocation };

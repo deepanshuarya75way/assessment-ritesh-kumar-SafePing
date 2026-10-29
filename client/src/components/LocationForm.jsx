@@ -30,6 +30,17 @@ const initialState = {
   contactIds: [],
   message: '',
 };
+function toFormState(location){
+  if(!location) return initialState;
+  return {
+    name:location.name,
+    latitude: String(location.coordinates.latitude),
+    longitude: String(location.coordinates.longitude),
+    radius:location.radius,
+    contactIds : location.contacts.map((c) => c._id || c),
+    message : location.message,
+  };
+}
 
 function PickerEvents({ onPick }) {
   useMapEvents({
@@ -183,8 +194,8 @@ function ContactPicker({ contacts, selectedContactIds, onToggle }) {
   );
 }
 
-function LocationForm({ contacts, onSubmit, isSubmitting }) {
-  const [form, setForm] = useState(initialState);
+function LocationForm({ contacts, onSubmit, isSubmitting, initialValues, submitLabel='save location' }) {
+  const [form, setForm] = useState(()=> toFormState(initialValues));
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [geoError, setGeoError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -192,6 +203,7 @@ function LocationForm({ contacts, onSubmit, isSubmitting }) {
   const [searchError, setSearchError] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [selectedSearchId, setSelectedSearchId] = useState(null);
+
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -321,13 +333,14 @@ function LocationForm({ contacts, onSubmit, isSubmitting }) {
       longitude: Number(form.longitude),
       radius: Number(form.radius),
     });
-
+if(!initialValues){
     setForm(initialState);
     setSearchQuery('');
     setSearchResults([]);
     setSearchError('');
     setSelectedSearchId(null);
     setShowAdvanced(false);
+}
   };
 
   const hasCoordinates = Boolean(form.latitude && form.longitude);
@@ -491,7 +504,7 @@ function LocationForm({ contacts, onSubmit, isSubmitting }) {
 
         <div className="md:col-span-2">
           <Button type="submit" className="w-full sm:w-auto" disabled={isSubmitting || contacts.length === 0 || !hasCoordinates || !form.contactIds.length}>
-            {isSubmitting ? 'Saving...' : 'Save location'}
+            {isSubmitting ? 'Saving...' : submitLabel}
           </Button>
         </div>
       </form>

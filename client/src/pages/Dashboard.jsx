@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { MapPin, Plus, Trash2, Users } from 'lucide-react';
 import StatCard from '../components/StatCard';
 import TrackingControl from '../components/TrackingControl';
@@ -14,6 +14,7 @@ import { useTrackingStore } from '../store/TrackingContext';
 import { cn } from '../utils/cn';
 
 function DashboardPage() {
+  const navigate = useNavigate();
   const [locations, setLocations] = useState([]);
   const [history, setHistory] = useState([]);
   const [contacts, setContacts] = useState([]);
@@ -136,6 +137,9 @@ function DashboardPage() {
                       {location.message}
                     </p>
                   </div>
+                  <Button type="button" size="sm" onClick={()=>navigate('/locations/new',{state:{editLocation:location}})}>
+                    Edit
+                  </Button>
                   <Button type="button" variant="ghost" size="sm" onClick={() => handleDeleteLocation(location._id)}>
                     <Trash2 className="h-4 w-4" />
                   </Button>

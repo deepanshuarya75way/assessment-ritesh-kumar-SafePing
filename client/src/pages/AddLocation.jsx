@@ -15,12 +15,17 @@ function AddLocationPage() {
   const [error, setError] = useState('');
   const [isSubmittingLocation, setIsSubmittingLocation] = useState(false);
   const [editingContactId, setEditingContactId] = useState(null);
+  const [editingLocation, setEditingLocation] = useState(null);
   const routeLocation = useLocation();
   useEffect(()=>{
     const contact = routeLocation.state?.editContact;
+    const place = routeLocation.state?.editLocation;
     if(contact){
       setEditingContactId(contact._id);
       setContactForm({name:contact.name, phone:contact.phone});
+    }
+    if(place){
+      setEditingLocation(place);
     }
   },[routeLocation.state])
 
@@ -51,7 +56,8 @@ function AddLocationPage() {
     try {
       setIsSubmittingLocation(true);
       setError('');
-      await locationService.create(payload);
+      if (editingLocation) await locationService.update(editingLocation._id, payload);
+      else await locationService.create(payload);
       navigate('/dashboard');
     } catch (requestError) {
       setError(requestError.response?.data?.message || 'Unable to save location.');
@@ -62,7 +68,7 @@ function AddLocationPage() {
 
   return (
     <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
-      <LocationForm contacts={contacts} onSubmit={createLocation} isSubmitting={isSubmittingLocation} />
+      <LocationForm key={editingLocation?._id || 'new'} contacts={contacts} onSubmit={createLocation} isSubmitting={isSubmittingLocation} initialValues={editingLocation} submitLabel={editingLocation?'save chanages' : 'save location'} />
 
       <Card className="space-y-6">
         <div>
